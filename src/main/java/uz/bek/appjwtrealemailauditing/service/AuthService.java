@@ -1,6 +1,8 @@
 package uz.bek.appjwtrealemailauditing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uz.bek.appjwtrealemailauditing.entity.User;
@@ -22,6 +24,8 @@ public class AuthService {
     PasswordEncoder passwordEncoder;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    JavaMailSender javaMailSender;
 
     public ApiResponse registerUser(RegisterDto registerDto){
         boolean existsByEmail = userRepository.existsByEmail(registerDto.getEmail());
@@ -34,11 +38,25 @@ public class AuthService {
         user.setEmail(registerDto.getEmail());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         user.setRoles(Collections.singleton(roleRepository.findByRoleName(RoleName.ROLE_USER)));
-
         user.setEmailCode(UUID.randomUUID().toString());
-
         userRepository.save(user);
+        // Email yuborish metodini chaqiramiz
+        sendEmail(user.getEmail(), user.getEmailCode());
+        return new ApiResponse("Ro'yxatdan muvaffaqiyatli o'tdingiz. Email orqali accoutingizni tasdiqlang", true);
+    }
 
-        return new ApiResponse("User registered", true);
+    public boolean sendEmail(String sendingEmail, String emailCode){
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("test@gmail.com");
+            message.setTo("sardorbeksafarov8844@gmail.com");
+            message.setSubject("Accountni tasdiqlash");
+            message.setText("<a href='http://localhost:8080/auth/verifyEmail?emailCode=" + emailCode + "+&email=" + sendingEmail +"'>Tasdiqlash</a>");
+            javaMailSender.send(message);
+            return true;
+        }
+        catch (Exception e){
+            return false;
+        }
     }
 }
