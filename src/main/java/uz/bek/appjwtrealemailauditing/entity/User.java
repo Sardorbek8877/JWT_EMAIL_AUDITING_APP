@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -26,15 +27,12 @@ public class User implements UserDetails {
     @GeneratedValue
     private UUID id; // Unique number for Users Id
 
-    @Size(min = 3, max = 50)
     @Column(nullable = false, length = 50)
     private String firstName;
 
-    @Size(min = 3, max = 50)
     @Column(nullable = false, length = 50)
     private String lastName;
 
-    @Email
     @Column(unique = true, nullable = false)
     private String email;
 
@@ -49,7 +47,7 @@ public class User implements UserDetails {
     private Timestamp updateAt;
 
     @ManyToMany
-    private List<Role> roles;
+    private Set<Role> roles;
 
 
     private boolean accountNonExpired = true; // Userning amal qilish muddati o'tmagan
@@ -59,6 +57,8 @@ public class User implements UserDetails {
     private boolean credentialsNonExpired = true; //Accountning ishonchliligini muddati tugaganligi qaytaradi
 
     private boolean enabled; //Accountning Aktivligini qaytaradi
+
+    private String emailCode;
 
     //-----------Methods from UserDetails-------//
 
