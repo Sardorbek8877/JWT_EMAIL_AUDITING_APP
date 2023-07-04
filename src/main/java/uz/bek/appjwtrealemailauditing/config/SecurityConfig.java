@@ -22,14 +22,12 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer :: disable)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(("/api/auth/register")).permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/verifyEmail").permitAll()
                         .anyRequest()
                         .authenticated()
                 );
         return httpSecurity.build();
     }
-
-
 
     @Bean
     PasswordEncoder passwordEncoder(){

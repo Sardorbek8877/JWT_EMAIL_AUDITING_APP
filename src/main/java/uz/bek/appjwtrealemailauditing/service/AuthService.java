@@ -13,6 +13,7 @@ import uz.bek.appjwtrealemailauditing.repository.RoleRepository;
 import uz.bek.appjwtrealemailauditing.repository.UserRepository;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -48,15 +49,28 @@ public class AuthService {
     public boolean sendEmail(String sendingEmail, String emailCode){
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("test@gmail.com");
-            message.setTo("sardorbeksafarov8844@gmail.com");
+            message.setFrom("sardorbeksafarov8844@gmail.com");
+            message.setTo(sendingEmail);
             message.setSubject("Accountni tasdiqlash");
-            message.setText("<a href='http://localhost:8080/auth/verifyEmail?emailCode=" + emailCode + "+&email=" + sendingEmail +"'>Tasdiqlash</a>");
+            message.setText("<a href='http://localhost:8080/api/auth/verifyEmail?emailCode=" + emailCode +
+                    "&email=" + sendingEmail +"'>Tasdiqlash</a>");
             javaMailSender.send(message);
             return true;
         }
         catch (Exception e){
             return false;
         }
+    }
+
+    public ApiResponse verifyEmail(String emailCode, String email) {
+        Optional<User> optionalUser = userRepository.findByEmailAndEmailCode(email, emailCode);
+        if (optionalUser.isPresent()){
+            User user = optionalUser.get();
+            user.setEnabled(true);
+            user.setEmailCode(null);
+            userRepository.save(user);
+            return new ApiResponse("Akkount tasdiqlandi", true);
+        }
+        return new ApiResponse("Akkount allaqachon tasdiqlangan", false);
     }
 }
